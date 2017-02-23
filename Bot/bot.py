@@ -6,18 +6,19 @@ class Bot:
 
     def __init__(self):
         self.game = None
-        self.previous = []
+        self.previous = None
 
     def setup(self, game):
         self.game = game
 
     def repeat_previous_move(self, legal):
-        if len(self.previous) == 0:
+        if self.previous is None:
             (_, choice) = random.choice(legal)
+            self.previous.append(choice)
             return choice
 
         else:
-            last_move = self.previous[-1]
+            last_move = self.previous
             for ((row, col), move) in legal:
                 if last_move == move:
                     return last_move
@@ -32,7 +33,7 @@ class Bot:
             self.game.issue_order_pass()
         else:
             choice = self.repeat_previous_move(legal)
-            self.previous.append(choice)
+            self.previous = choice
             self.game.issue_order(choice)
 
 
