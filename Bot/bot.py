@@ -7,6 +7,12 @@ class Bot:
     def __init__(self):
         self.game = None
         self.previous = None
+        self.opp = {
+            "left" : "right",
+            "right" : "left",
+            "up" : "down",
+            "down" : "up"
+        }
 
     def setup(self, game):
         self.game = game
@@ -22,9 +28,12 @@ class Bot:
                 if last_move == move:
                     return last_move
 
+        last_move_opp = self.opp[last_move]
+        while 1:
             (_, choice) = random.choice(legal)
-            return choice
-
+            if choice != last_move_opp:
+                break
+        return choice
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
