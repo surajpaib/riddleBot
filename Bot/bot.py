@@ -13,6 +13,7 @@ class Bot:
             "up" : "down",
             "down" : "up"
         }
+        self.repeat_count = 0
 
     def setup(self, game):
         self.game = game
@@ -22,18 +23,17 @@ class Bot:
             (_, choice) = random.choice(legal)
             return choice
 
-        else:
+        elif self.repeat_count <= 3:
             last_move = self.previous
             for ((row, col), move) in legal:
                 if last_move == move:
+                    self.repeat_count += 1
                     return last_move
+        self.repeat_count = 0
 
-        last_move_opp = self.opp[last_move]
-        while 1:
-            (_, choice) = random.choice(legal)
-            if choice != last_move_opp:
-                break
+        (_, choice) = random.choice(legal)
         return choice
+
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
