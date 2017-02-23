@@ -7,12 +7,6 @@ class Bot:
     def __init__(self):
         self.game = None
         self.previous = None
-        self.opp = {
-            "left" : "right",
-            "right" : "left",
-            "up" : "down",
-            "down" : "up"
-        }
         self.repeat_count = 0
 
     def setup(self, game):
