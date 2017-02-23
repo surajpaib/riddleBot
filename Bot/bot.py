@@ -14,7 +14,6 @@ class Bot:
     def repeat_previous_move(self, legal):
         if len(self.previous) == 0:
             (_, choice) = random.choice(legal)
-            self.previous.append(choice)
             return choice
 
         else:
@@ -33,5 +32,7 @@ class Bot:
             self.game.issue_order_pass()
         else:
             choice = self.repeat_previous_move(legal)
+            self.previous.append(choice)
             self.game.issue_order(choice)
+
 
