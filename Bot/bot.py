@@ -16,6 +16,6 @@ class Bot:
         if len(legal) == 0:
             self.game.issue_order_pass()
         else:
-	    choice = random.choice(legal)
+            choice = random.choice(legal)
             self.game.issue_order(choice)
 
