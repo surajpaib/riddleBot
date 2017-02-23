@@ -14,7 +14,6 @@ class Bot:
     def repeat_previous_move(self, legal):
         if self.previous is None:
             (_, choice) = random.choice(legal)
-            self.previous.append(choice)
             return choice
 
         else:
