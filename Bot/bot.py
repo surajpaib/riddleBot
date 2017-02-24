@@ -46,6 +46,13 @@ class Bot:
         nearest_snippet = snippet[int(min_index)]
         return min_value, nearest_snippet
 
+    def compare_best_choice(self, legal, new_distance, position, nearest_snippet):
+        for (pos_addition, choice) in legal:
+            pos = np.array(position) + np.array(pos_addition)
+            possible_distance = self.distance_metric(nearest_snippet, pos)
+            if new_distance <= possible_distance:
+                return True
+
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
@@ -55,7 +62,6 @@ class Bot:
             snippet, position, opponent = self.get_grid()
             min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
-
             while 1:
                 (pos_addition, choice) = random.choice(legal)
                 pos = np.array(position) + np.array(pos_addition)
@@ -63,9 +69,7 @@ class Bot:
                 if new_distance < min_value:
                     break
                 else:
-                    for (pos_addition1, choice1) in legal:
-                        pos1 = np.array(position) + np.array(pos_addition1)
-                        distance = self.distance_metric(nearest_snippet, pos1)
-                        if new_distance <= distance:
+                    if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
+                        break
 
-
+            return choice
