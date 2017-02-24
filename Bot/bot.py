@@ -35,7 +35,16 @@ class Bot:
 
         return snippet_loc, my_loc, opponent_loc
 
+    def get_closest_snippet(self, snippet, position):
+        distances = []
+        for coord in snippet:
+            distance = self.distance_metric(coord, position)
+            distances.append(distance)
 
+        min_index = np.argmin(distances)
+        min_value = distances[int(min_index)]
+        nearest_snippet = snippet[int(min_index)]
+        return min_value, nearest_snippet
 
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
@@ -44,10 +53,19 @@ class Bot:
             self.game.issue_order_pass()
         else:
             snippet, position, opponent = self.get_grid()
-            print snippet
-            print position
-            for coord in snippet:
-                similarity = self.distance_metric(coord, position)
+            min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
+
+            while 1:
+                (pos_addition, choice) = random.choice(legal)
+                pos = np.array(position) + np.array(pos_addition)
+                new_distance = self.distance_metric(nearest_snippet, pos)
+                if new_distance < min_value:
+                    break
+                else:
+                    for (pos_addition1, choice1) in legal:
+                        pos1 = np.array(position) + np.array(pos_addition1)
+                        distance = self.distance_metric(nearest_snippet, pos1)
+                        if new_distance <= distance:
 
 
