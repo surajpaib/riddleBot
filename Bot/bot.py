@@ -10,7 +10,8 @@ class Bot:
     def setup(self, game):
         self.game = game
 
-    def distance_metric(self, vector1 , vector2):
+    @staticmethod
+    def distance_metric(vector1, vector2):
         vector1mag = np.sqrt(vector1[0] ** 2 + vector1[1] ** 2)
         vector2mag = np.sqrt(vector2[0] ** 2 + vector2[1] ** 2)
         distance = np.abs(vector1mag - vector2mag)
@@ -22,7 +23,6 @@ class Bot:
         field = np.array(self.game.field.cell)
         [field_height, field_width] = self.game.field_height, self.game.field_width
         field = np.reshape(field, (field_height, field_width))
-        print field
         snippet_loc = []
         for idx in range(field_height):
             for idy in range(field_width):
@@ -60,6 +60,9 @@ class Bot:
             self.game.issue_order_pass()
         else:
             snippet, position, opponent = self.get_grid()
+            if snippet == []:
+                (_, choice) = random.choice(legal)
+                return choice
             min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
             while 1:
