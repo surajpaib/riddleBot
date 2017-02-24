@@ -1,6 +1,7 @@
+from __future__ import numpy as np
 import random
-import sys
 import numpy as np
+
 
 class Bot:
 
