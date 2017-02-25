@@ -1,5 +1,6 @@
 import random
 
+
 class Bot:
 
     def __init__(self):
@@ -87,9 +88,9 @@ class Bot:
             self.game.issue_order_pass()
         else:
             snippet, position, opponent = self.get_grid()
-            if snippet is None:
+            if snippet == []:
                 (_, choice) = random.choice(legal)
-                return choice
+                self.game.issue_order(choice)
             min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
             while 1:
@@ -101,4 +102,5 @@ class Bot:
                 else:
                     if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
                         break
-            return choice
+
+            self.game.issue_order(choice)
