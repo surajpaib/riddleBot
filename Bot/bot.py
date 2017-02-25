@@ -1,5 +1,5 @@
 import random
-import math
+
 
 class Bot:
 
@@ -25,7 +25,7 @@ class Bot:
         for i in range(len(array)):
             if min_value == array[i]:
                 index = i
-        return index
+        return index, min_value
 
     @staticmethod
     def reshape(list1, height, width):
@@ -53,7 +53,6 @@ class Bot:
                     my_loc = [idx, idy]
                 if field[idx][idy] == int(self.game.other_botid):
                     opponent_loc = [idx, idy]
-
         return snippet_loc, my_loc, opponent_loc
 
     @staticmethod
@@ -69,9 +68,8 @@ class Bot:
             distance = self.distance_metric(coord, position)
             distances.append(distance)
 
-        min_index = self.argmin(distances)
-        min_value = distances[int(min_index)]
-        nearest_snippet = snippet[int(min_index)]
+        min_index, min_value = self.argmin(distances)
+        nearest_snippet = snippet[min_index]
         return min_value, nearest_snippet
 
     def compare_best_choice(self, legal, new_distance, position, nearest_snippet):
@@ -81,27 +79,27 @@ class Bot:
             if new_distance <= possible_distance:
                 return True
 
+    def pick_best_move(self,legal, my_position, nearest_snippet_location):
+        distances_from_snippet = []
+        for (direction_coord, direction) in legal:
+            new_coordinates = self.add(my_position, direction_coord)
+            distances_from_snippet.append(self.distance_metric(new_coordinates, nearest_snippet_location))
+
+        index, distance_min = self.argmin(distances_from_snippet)
+        (_, choice) = legal[index]
+        return choice
+
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
         if len(legal) == 0:
             self.game.issue_order_pass()
         else:
-            snippet, position, opponent = self.get_grid()
-            if snippet == []:
+            snippet, my_position, opponent = self.get_grid()
+            if snippet is None:
                 (_, choice) = random.choice(legal)
                 self.game.issue_order(choice)
                 return
-            min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
-
-            while 1:
-                (pos_addition, choice) = random.choice(legal)
-                pos = self.add(list(position), list(pos_addition))
-                new_distance = self.distance_metric(nearest_snippet, pos)
-                if new_distance <= min_value:
-                    break
-                else:
-                    if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
-                        break
-
+            min_value, nearest_snippet = self.get_closest_snippet(snippet, my_position)
+            choice = self.pick_best_move(legal, my_position, nearest_snippet)
             self.game.issue_order(choice)
