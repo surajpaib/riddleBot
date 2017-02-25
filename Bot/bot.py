@@ -15,7 +15,8 @@ class Bot:
         distance = abs(vector1mag - vector2mag)
         return distance
 
-    def argmin(self, array):
+    @staticmethod
+    def argmin(array):
         global index
         new_array = sorted(array)
         min_value = new_array[0]
@@ -25,11 +26,9 @@ class Bot:
                 index = i
         return index
 
-    def reshape(self, list1, height, width):
+    @staticmethod
+    def reshape(list1, height, width):
         array = []
-
-
-
         for h in range(height):
             array_inner = []
             for w in range(width):
@@ -47,16 +46,17 @@ class Bot:
         snippet_loc = []
         for idx in range(field_height):
             for idy in range(field_width):
-                if field[idx][idy] == 6 :
+                if field[idx][idy] == 6:
                     snippet_loc.append([idx, idy])
-                if field[idx][idy] == int(self.game.my_botid) :
+                if field[idx][idy] == int(self.game.my_botid):
                     my_loc = [idx, idy]
-                if field[idx][idy] == int(self.game.other_botid) :
+                if field[idx][idy] == int(self.game.other_botid):
                     opponent_loc = [idx, idy]
 
         return snippet_loc, my_loc, opponent_loc
 
-    def add(self, list1, list2):
+    @staticmethod
+    def add(list1, list2):
         idx = list1[0] + list2[0]
         idy = list1[1] + list2[1]
 
@@ -87,14 +87,14 @@ class Bot:
             self.game.issue_order_pass()
         else:
             snippet, position, opponent = self.get_grid()
-            if snippet == []:
+            if snippet is None:
                 (_, choice) = random.choice(legal)
                 return choice
             min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
             while 1:
                 (pos_addition, choice) = random.choice(legal)
-                pos =  self.add(list(position), list(pos_addition))
+                pos = self.add(list(position), list(pos_addition))
                 new_distance = self.distance_metric(nearest_snippet, pos)
                 if new_distance < min_value:
                     break
@@ -102,4 +102,4 @@ class Bot:
                     if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
                         break
 
-            print(choice)
+                return choice
