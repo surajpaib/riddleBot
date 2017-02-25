@@ -101,5 +101,4 @@ class Bot:
                 else:
                     if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
                         break
-
-                return choice
+            return choice
