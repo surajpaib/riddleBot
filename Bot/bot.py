@@ -11,9 +11,9 @@ class Bot:
 
     @staticmethod
     def distance_metric(vector1, vector2):
-        vect1_mag = math.sqrt(vector1[0]**2 + vector1[1]**2)
-        vect2_mag = math.sqrt(vector2[0]**2 + vector2[1]**2)
-        distance = abs(vect1_mag + vect2_mag)
+        vertical_d = abs(vector1[0] - vector2[0])
+        horizontal_d = abs(vector1[1] - vector2[1])
+        distance = abs(vertical_d + horizontal_d)
         return distance
 
     @staticmethod
