@@ -1,5 +1,5 @@
 import random
-
+import math
 
 class Bot:
 
@@ -11,9 +11,9 @@ class Bot:
 
     @staticmethod
     def distance_metric(vector1, vector2):
-        vector1mag = (vector1[0] ** 2 + vector1[1] ** 2) ** 0.5
-        vector2mag = (vector2[0] ** 2 + vector2[1] ** 2) ** 0.5
-        distance = abs(vector1mag - vector2mag)
+        vertical_d = abs(vector1[0] - vector2[0])
+        horizontal_d = abs(vector1[1] - vector2[1])
+        distance = abs(vertical_d + horizontal_d)
         return distance
 
     @staticmethod
@@ -91,13 +91,14 @@ class Bot:
             if snippet == []:
                 (_, choice) = random.choice(legal)
                 self.game.issue_order(choice)
+                return
             min_value, nearest_snippet = self.get_closest_snippet(snippet, position)
 
             while 1:
                 (pos_addition, choice) = random.choice(legal)
                 pos = self.add(list(position), list(pos_addition))
                 new_distance = self.distance_metric(nearest_snippet, pos)
-                if new_distance < min_value:
+                if new_distance <= min_value:
                     break
                 else:
                     if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
