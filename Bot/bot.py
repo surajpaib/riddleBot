@@ -1,7 +1,4 @@
-from __future__ import numpy as np
 import random
-import numpy as np
-
 
 class Bot:
 
@@ -13,17 +10,40 @@ class Bot:
 
     @staticmethod
     def distance_metric(vector1, vector2):
-        vector1mag = np.sqrt(vector1[0] ** 2 + vector1[1] ** 2)
-        vector2mag = np.sqrt(vector2[0] ** 2 + vector2[1] ** 2)
-        distance = np.abs(vector1mag - vector2mag)
+        vector1mag = (vector1[0] ** 2 + vector1[1] ** 2) ** 0.5
+        vector2mag = (vector2[0] ** 2 + vector2[1] ** 2) ** 0.5
+        distance = abs(vector1mag - vector2mag)
         return distance
+
+    def argmin(self, array):
+        global index
+        new_array = sorted(array)
+        min_value = new_array[0]
+
+        for i in range(len(array)):
+            if min_value == array[i]:
+                index = i
+        return index
+
+    def reshape(self, list1, height, width):
+        array = []
+
+
+
+        for h in range(height):
+            array_inner = []
+            for w in range(width):
+                array_inner.append(list1[h][w][0])
+            array.append(array_inner)
+
+        return array
 
     def get_grid(self):
         global opponent_loc
         global my_loc
-        field = np.array(self.game.field.cell)
+        field = self.game.field.cell
         [field_height, field_width] = self.game.field_height, self.game.field_width
-        field = np.reshape(field, (field_height, field_width))
+        field = self.reshape(field, field_height, field_width)
         snippet_loc = []
         for idx in range(field_height):
             for idy in range(field_width):
@@ -36,20 +56,26 @@ class Bot:
 
         return snippet_loc, my_loc, opponent_loc
 
+    def add(self, list1, list2):
+        idx = list1[0] + list2[0]
+        idy = list1[1] + list2[1]
+
+        return [idx, idy]
+
     def get_closest_snippet(self, snippet, position):
         distances = []
         for coord in snippet:
             distance = self.distance_metric(coord, position)
             distances.append(distance)
 
-        min_index = np.argmin(distances)
+        min_index = self.argmin(distances)
         min_value = distances[int(min_index)]
         nearest_snippet = snippet[int(min_index)]
         return min_value, nearest_snippet
 
     def compare_best_choice(self, legal, new_distance, position, nearest_snippet):
         for (pos_addition, choice) in legal:
-            pos = np.array(position) + np.array(pos_addition)
+            pos = self.add(list(position), list(pos_addition))
             possible_distance = self.distance_metric(nearest_snippet, pos)
             if new_distance <= possible_distance:
                 return True
@@ -68,7 +94,7 @@ class Bot:
 
             while 1:
                 (pos_addition, choice) = random.choice(legal)
-                pos = np.array(position) + np.array(pos_addition)
+                pos =  self.add(list(position), list(pos_addition))
                 new_distance = self.distance_metric(nearest_snippet, pos)
                 if new_distance < min_value:
                     break
@@ -76,4 +102,4 @@ class Bot:
                     if self.compare_best_choice(legal, new_distance, position, nearest_snippet):
                         break
 
-            return choice
+            print(choice)
