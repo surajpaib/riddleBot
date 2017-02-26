@@ -6,6 +6,14 @@ class Bot:
 
     def __init__(self):
         self.game = None
+        self.field = None
+        self.snippet = None
+        self.weapon = None
+        self.bug = None
+        self.my_pos = None
+        self.opponent = None
+        self.snippet_path = None
+        self.snippet_hop = None
 
     def setup(self, game):
         self.game = game
@@ -82,35 +90,62 @@ class Bot:
             if new_distance <= possible_distance:
                 return True
 
-    def fallback_move(self, legal, snippet, weapon, bug):
-        if snippet is None & weapon is None & bug is None:
+    def fallback_move(self, legal):
+        if self.snippet is None & self.weapon is None & self.bug is None:
             (_, choice) = random.choice(legal)
             self.game.issue_order(choice)
             return True
 
-    def next_move(self, my_pos, field, hop):
+    def next_move(self, my_pos, hop):
         moves = []
+        field = self.field
         with self.add(my_pos, UP) as up:
-            if field[up] != 3:
+            if field[up[0]][up[1]] != 3:
                 moves.append(up)
-
         with self.add(my_pos, DOWN) as down:
-            if field[down] != 3:
+            if field[down[0]][down[1]] != 3:
                 moves.append(down)
         with self.add(my_pos, LEFT) as left:
-            if field[left] != 3:
+            if field[left[0]][left[1]] != 3:
                 moves.append(left)
         with self.add(my_pos, RIGHT) as right:
-            if field[right] != 3:
+            if field[right[0]][right[1]] != 3:
                 moves.append(right)
-        hop += 1
-        return moves
 
-    def shortest_path_alogrithm(self, field, my_pos, snippet, weapon, bug):
-        hop = 0
-        moves = self.next_move(my_pos, field, hop)
+        hop += 1
+        return moves, hop
+
+    def possible_paths(self, moves, hop, path) :
         for move in moves:
-            
+            path.append(move)
+            if len(path) >= 3 & path[-1] == path[-3]:
+                continue
+
+            if self.field[move[0]][move[1]] == 6 or self.field[move[0]][move[1]] == 5:
+                if self.snippet_path is not None:
+                    for snippet in self.snippet_path:
+                        if snippet == path:
+                            continue
+                self.snippet_path.append(path)
+                self.snippet_hop.append(hop)
+                path = []
+                hop = 0
+            moves, hop = self.next_move(move, hop)
+            if len(moves) != 0:
+                self.possible_paths(moves, hop, path)
+
+            else:
+                path.remove(object=path[-1])
+                hop -= 1
+
+    def shortest_path_algorithm(self, my_pos, snippet, weapon, bug):
+        field = self.field
+        hop = 0
+        path = []
+        moves, hop = self.next_move(my_pos, hop) # State 0 - Moves around my position
+        self.possible_paths(moves, hop, path)
+
+
 
 
     def do_turn(self):
@@ -119,12 +154,7 @@ class Bot:
         if len(legal) == 0:
             self.game.issue_order_pass()
             return
-        field, snippet, my_pos, opponent, weapon, bug = self.get_grid()
-        if self.fallback_move(legal, snippet, weapon, bug) is True:
+        self.field, self.snippet, self.my_pos, self.opponent, self.weapon, self.bug = self.get_grid()
+        if self.fallback_move(legal) is True:
             return
 
-        self.shortest_path_algoirthm(field, my_pos, snippet, weapon, bug)
-
-        min_value, nearest_snippet = self.get_closest_snippet(snippet, my_position)
-        choice = self.pick_best_move(legal, my_position, nearest_snippet)
-        self.game.issue_order(choice)
