@@ -1,6 +1,7 @@
 import random
 import math
 
+UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 class Bot:
 
     def __init__(self):
@@ -11,10 +12,7 @@ class Bot:
 
     @staticmethod
     def distance_metric(vector1, vector2):
-        vertical_d = abs(vector1[0] - vector2[0])
-        horizontal_d = abs(vector1[1] - vector2[1])
-        distance = abs(vertical_d + horizontal_d)
-        return distance
+
 
     @staticmethod
     def argmin(array):
@@ -53,7 +51,12 @@ class Bot:
                     my_loc = [idx, idy]
                 if field[idx][idy] == int(self.game.other_botid):
                     opponent_loc = [idx, idy]
-        return snippet_loc, my_loc, opponent_loc
+                if field[idx][idy] == 5:
+                    weapon_loc = [idx, idy]
+                if field[idx][idy] == 4:
+                    bug_loc = [idx, idy]
+
+        return field, snippet_loc, my_loc, opponent_loc, weapon_loc, bug_loc
 
     @staticmethod
     def add(list1, list2):
@@ -79,27 +82,49 @@ class Bot:
             if new_distance <= possible_distance:
                 return True
 
-    def pick_best_move(self,legal, my_position, nearest_snippet_location):
-        distances_from_snippet = []
-        for (direction_coord, direction) in legal:
-            new_coordinates = self.add(my_position, direction_coord)
-            distances_from_snippet.append(self.distance_metric(new_coordinates, nearest_snippet_location))
+    def fallback_move(self, legal, snippet, weapon, bug):
+        if snippet is None & weapon is None & bug is None:
+            (_, choice) = random.choice(legal)
+            self.game.issue_order(choice)
+            return True
 
-        index, distance_min = self.argmin(distances_from_snippet)
-        (_, choice) = legal[index]
-        return choice
+    def next_move(self, my_pos, field, hop):
+        moves = []
+        with self.add(my_pos, UP) as up:
+            if field[up] != 3:
+                moves.append(up)
+
+        with self.add(my_pos, DOWN) as down:
+            if field[down] != 3:
+                moves.append(down)
+        with self.add(my_pos, LEFT) as left:
+            if field[left] != 3:
+                moves.append(left)
+        with self.add(my_pos, RIGHT) as right:
+            if field[right] != 3:
+                moves.append(right)
+        hop += 1
+        return moves
+
+    def shortest_path_alogrithm(self, field, my_pos, snippet, weapon, bug):
+        hop = 0
+        moves = self.next_move(my_pos, field, hop)
+        for move in moves:
+            
+
 
     def do_turn(self):
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
         if len(legal) == 0:
             self.game.issue_order_pass()
-        else:
-            snippet, my_position, opponent = self.get_grid()
-            if snippet is None:
-                (_, choice) = random.choice(legal)
-                self.game.issue_order(choice)
-                return
-            min_value, nearest_snippet = self.get_closest_snippet(snippet, my_position)
-            choice = self.pick_best_move(legal, my_position, nearest_snippet)
-            self.game.issue_order(choice)
+            return
+        field, snippet, my_pos, opponent, weapon, bug = self.get_grid()
+        if self.fallback_move(legal, snippet, weapon, bug) is True:
+            return
+
+        self.shortest_path_algoirthm(field, my_pos, snippet, weapon, bug)
+
+        min_value, nearest_snippet = self.get_closest_snippet(snippet, my_position)
+        choice = self.pick_best_move(legal, my_position, nearest_snippet)
+        self.game.issue_order(choice)
