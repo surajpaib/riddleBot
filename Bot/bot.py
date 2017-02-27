@@ -24,13 +24,6 @@ class Bot:
     def __init__(self):
         self.game = None
         self.field = None
-        self.snippet = None
-        self.weapon = None
-        self.bug = None
-        self.my_pos = None
-        self.opponent = None
-        self.snippet_path = []
-        self.snippet_hop = []
 
     def setup(self, game):
         self.game = game
@@ -46,22 +39,39 @@ class Bot:
 
         return array
 
-    def set_grid_and_distances(self, field_height, field_width):
-        grid = self.field
-        distance = self.field
+    @staticmethod
+    def set_grid(field, field_height, field_width, my_pos):
+        """
+        
+        :param field_height: 
+        :param field_width: 
+        :return: Prepare Grid and Distance objects for BFS 
+        """
+        grid = field
+        distance = field
         for idx in range(field_height):
             for idy in range(field_width):
                 # Set initial distance to -1
                 distance[idx][idy] = -1
 
-                if self.field[idx][idy] == int(self.game.my_botid):
+                if grid[idx][idy] == int(my_pos):
                     grid[idx][idy] = 2
-                if self.field[idx][idy] == 3:
+                elif grid[idx][idy] == 3:
                     grid[idx][idy] = 0
                 else:
                     grid[idx][idy] = 1
 
+
         return grid, distance
+
+    # def set_distances(, field_height, field_width ):
+    #     distance = self.field
+    #     for idx in range(field_height):
+    #         for idy in range(field_width):
+    #             distance[idx][idy] = -1
+    #
+    #     return distance
+
 
     def get_grid(self):
         """
@@ -73,9 +83,9 @@ class Bot:
         field = self.game.field.cell
         [field_height, field_width] = self.game.field_height, self.game.field_width
         self.field = self.reshape(field, field_height, field_width)
-        [grid, distance] = self.set_grid_and_distances(field_height, field_width)
+        grid, distance = self.set_grid(self.field, field_height, field_width, self.game.my_botid)
+        # distance = self.set_distances(field_height, field_width)
         print(grid, distance)
-
     def do_turn(self):
         """
         
