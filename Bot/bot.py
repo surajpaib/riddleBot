@@ -106,7 +106,7 @@ class Bot:
                     if abs(i) == abs(j):
                         continue
 
-                    
+
     def do_turn(self):
         """
         
