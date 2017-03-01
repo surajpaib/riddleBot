@@ -63,8 +63,8 @@ class Bot:
 
     @staticmethod
     def add(array1, array2):
-        array_idx = abs(array1[0] + array2[0])
-        array_idy = abs(array1[1] + array2[1])
+        array_idx = array1[0] + array2[0]
+        array_idy = array1[1] + array2[1]
 
         return [array_idx, array_idy]
 
@@ -115,12 +115,12 @@ class Bot:
                     new_pos = self.add(position, [i, j])
                     if new_pos[0] < 0:
                         new_pos[0] = 0
-                    elif new_pos[0] > int(self.game.field_width):
-                        new_pos[0] = int(self.game.field_width)
+                    elif new_pos[0] > int(self.game.field_height - 1):
+                        new_pos[0] = int(self.game.field_height - 1)
                     if new_pos[1] < 0:
                         new_pos[1] = 0
-                    elif new_pos[1] > int(self.game.field_height):
-                        new_pos[1] = int(self.game.field_height)
+                    elif new_pos[1] > int(self.game.field_width - 1):
+                        new_pos[1] = int(self.game.field_width - 1)
 
                     if new_pos == position:
                         continue
@@ -132,7 +132,7 @@ class Bot:
 
 
         print(distance)
-
+        return distance
 
 
 
@@ -150,5 +150,6 @@ class Bot:
             field, grid, distance = self.get_grid()
             self.get_positions(field, self.game.field_height, self.game.field_width)
             distance = self.bread_first_search(grid, distance)
-            # for snipp in self.snippetpos:
-            #     print(distance[snipp[0]][snipp[1]])
+            for snipp in self.snippetpos:
+                print(snipp)
+                print(distance[snipp[0]][snipp[1]])
