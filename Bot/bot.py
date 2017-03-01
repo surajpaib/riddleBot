@@ -26,6 +26,8 @@ class Bot:
 
     def __init__(self):
         self.game = None
+        self.mypos = None
+        self.snippetpos = []
 
     def setup(self, game):
         self.game = game
@@ -41,13 +43,18 @@ class Bot:
 
         return array
 
-
-
+    def get_positions(self, field, field_height, field_width):
+        for idx in range(field_height):
+            for idy in range(field_width):
+                if field[idx][idy] == int(self.game.my_botid):
+                    self.mypos = [idx, idy]
+                elif field[idx][idy] == 6:
+                    self.snippetpos.append([idx, idy])
 
     @staticmethod
-    def set_distances(field2, field_height, field_width):
+    def set_distances(field, field_height, field_width):
 
-        distance = field2
+        distance = field
         for idx in range(field_height):
             for idy in range(field_width):
                 distance[idx][idy] = -1
@@ -60,7 +67,7 @@ class Bot:
     
         :param field_height: 
         :param field_width: 
-        :return: Prepare Grid and Distance objects for BFS 
+        :return: Prepare Grid object for BFS 
         """
         grid = field
         for idx in range(field_height):
@@ -82,8 +89,24 @@ class Bot:
         [field_height, field_width] = self.game.field_height, self.game.field_width
         grid = self.set_grid(self.reshape(field, field_height, field_width), field_height, field_width, self.game.my_botid)
         distance = self.set_distances(self.reshape(field, field_height, field_width), field_height, field_width)
-        print(grid, distance)
+        field = self.reshape(field, field_height, field_width)
+        return field, grid, distance
 
+
+    def bread_first_search(self, grid, distance):
+        iterator = Iterator()
+        mypos = self.mypos
+        iterator.enqueue(mypos)
+
+        while(not iterator.isEmpty()):
+            position = iterator.dequeue()
+
+            for i in [-1, 0, 1]:
+                for j in [-1, 0 , 1]:
+                    if abs(i) == abs(j):
+                        continue
+
+                    
     def do_turn(self):
         """
         
@@ -94,5 +117,6 @@ class Bot:
         if len(legal) == 0:
             self.game.issue_order_pass()
         else:
-            self.get_grid()
-
+            field, grid, distance = self.get_grid()
+            self.get_positions(field, self.game.field_height, self.game.field_width)
+            self.bread_first_search(grid, distance)
