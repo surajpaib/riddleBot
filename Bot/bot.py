@@ -9,6 +9,7 @@ directions ={
     "[0, 1]" : "right"
 }
 
+
 class Iterator:
     def __init__(self):
         self.fields = []
@@ -24,8 +25,6 @@ class Iterator:
 
     def size(self):
         return len(self.fields)
-
-
 
 
 class Bot:
@@ -105,7 +104,6 @@ class Bot:
         field = self.reshape(field, field_height, field_width)
         return field, grid, distance
 
-
     def breadth_first_search(self, grid, distance):
         iterator = Iterator()
         mypos = self.mypos
@@ -160,8 +158,6 @@ class Bot:
                 if new_closest_distance < closest_distance:
                     return move
 
-
-
     def do_turn(self):
         """
         
@@ -175,11 +171,13 @@ class Bot:
             field, grid, distance = self.get_grid()
             self.get_positions(field, self.game.field_height, self.game.field_width)
             if self.snippetpos == []:
-                self.game.issue_order(random.choice(legal))
+                (_, choice) = random.choice(legal)
+                self.game.issue_order(choice)
                 return
             distance = self.breadth_first_search(grid, distance)
             choice = self.execute_next_move(distance, grid)
             if choice is None:
-                self.game.issue_order(random.choice(legal))
+                (_, choice) = random.choice(legal)
+                self.game.issue_order(choice)
                 return
             self.game.issue_order(directions[str(choice)])
