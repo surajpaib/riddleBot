@@ -2,6 +2,12 @@ import random
 import math
 
 UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+directions ={
+    "[-1, 0]" : "up",
+    "[1, 0]" : "down",
+    "[0, -1]" : "left",
+    "[0, 1]" : "right"
+}
 
 class Iterator:
     def __init__(self):
@@ -100,7 +106,7 @@ class Bot:
         return field, grid, distance
 
 
-    def bread_first_search(self, grid, distance):
+    def breadth_first_search(self, grid, distance):
         iterator = Iterator()
         mypos = self.mypos
         iterator.enqueue(mypos)
@@ -139,12 +145,23 @@ class Bot:
         for i, dist in enumerate(snippet_distances):
             if closest_distance == dist:
                 closest_snippet =  self.snippetpos[i]
+                break
 
-        return closest_snippet
+        return closest_snippet, closest_distance
 
-    def execute_next_move(self, distance):
-            closest_snippet = self.get_closest_snippet(distance)
-            print(closest_snippet)
+    def execute_next_move(self, distance, grid):
+            closest_snippet, closest_distance = self.get_closest_snippet(distance)
+
+            for move in UP, DOWN, LEFT, RIGHT:
+                new_position = self.add(self.mypos, move)
+                self.mypos = new_position
+                distance = self.breadth_first_search(grid, distance)
+                (_, new_closest_distance) = self.get_closest_snippet(distance)
+                if new_closest_distance < closest_distance:
+                    return move
+
+
+
     def do_turn(self):
         """
         
@@ -160,5 +177,9 @@ class Bot:
             if self.snippetpos == []:
                 self.game.issue_order(random.choice(legal))
                 return
-            distance = self.bread_first_search(grid, distance)
-            self.execute_next_move(distance)
+            distance = self.breadth_first_search(grid, distance)
+            choice = self.execute_next_move(distance, grid)
+            if choice is None:
+                self.game.issue_order(random.choice(legal))
+                return
+            self.game.issue_order(directions[str(choice)])
