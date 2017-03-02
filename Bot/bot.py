@@ -1,5 +1,4 @@
 import random
-import math
 
 UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 directions ={
@@ -104,12 +103,11 @@ class Bot:
         field = self.reshape(field, field_height, field_width)
         return field, grid, distance
 
-    def breadth_first_search(self, grid, distance):
+    def breadth_first_search(self,mypos, grid, distance):
         iterator = Iterator()
-        mypos = self.mypos
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
-
+        grid[mypos[0]][mypos[1]] = 0
         while not iterator.isEmpty():
             position = iterator.dequeue()
 
@@ -138,22 +136,34 @@ class Bot:
 
     def get_closest_snippet(self, distance):
         snippet_distances = []
-        snippet_distances.append([distance[snipp[0]][snipp[1]] for snipp in self.snippetpos])
+        for snipp in self.snippetpos:
+            snippet_distances.append(distance[snipp[0]][snipp[1]])
+        print(self.snippetpos)
+        print(snippet_distances)
         closest_distance = min(snippet_distances)
         for i, dist in enumerate(snippet_distances):
             if closest_distance == dist:
                 closest_snippet =  self.snippetpos[i]
                 break
-
+        print("Closest snippet")
+        print(closest_snippet, closest_distance)
         return closest_snippet, closest_distance
 
     def execute_next_move(self, distance, grid):
             closest_snippet, closest_distance = self.get_closest_snippet(distance)
 
             for move in UP, DOWN, LEFT, RIGHT:
+                print("Current position")
+                print(self.mypos)
+
                 new_position = self.add(self.mypos, move)
-                self.mypos = new_position
-                distance = self.breadth_first_search(grid, distance)
+                print("New position")
+                print(new_position)
+                print(distance)
+                distance[self.mypos[0]][self.mypos[1]] = -1
+                grid[self.mypos[0]][self.mypos[1]] = 0
+                distance = self.breadth_first_search(new_position, grid, distance)
+                print(distance)
                 (_, new_closest_distance) = self.get_closest_snippet(distance)
                 if new_closest_distance < closest_distance:
                     return move
@@ -170,14 +180,6 @@ class Bot:
         else:
             field, grid, distance = self.get_grid()
             self.get_positions(field, self.game.field_height, self.game.field_width)
-            if self.snippetpos == []:
-                (_, choice) = random.choice(legal)
-                self.game.issue_order(choice)
-                return
-            distance = self.breadth_first_search(grid, distance)
+            distance = self.breadth_first_search(self.mypos, grid, distance)
             choice = self.execute_next_move(distance, grid)
-            if choice is None:
-                (_, choice) = random.choice(legal)
-                self.game.issue_order(choice)
-                return
             self.game.issue_order(directions[str(choice)])
