@@ -1,7 +1,7 @@
 import random
 import math
 
-UP, DOWN, LEFT, RIGHT = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
 class Iterator:
     def __init__(self):
@@ -130,11 +130,21 @@ class Bot:
                         if grid[new_pos[0]][new_pos[1]] != 0:
                             distance[new_pos[0]][new_pos[1]] = distance[position[0]][position[1]] + 1
                             iterator.enqueue(new_pos)
-
-
-
         return distance
 
+    def get_closest_snippet(self, distance):
+        snippet_distances = []
+        snippet_distances.append([distance[snipp[0]][snipp[1]] for snipp in self.snippetpos])
+        closest_distance = min(snippet_distances)
+        for i, dist in enumerate(snippet_distances):
+            if closest_distance == dist:
+                closest_snippet =  self.snippetpos[i]
+
+        return closest_snippet
+
+    def execute_next_move(self, distance):
+            closest_snippet = self.get_closest_snippet(distance)
+            print(closest_snippet)
     def do_turn(self):
         """
         
@@ -147,7 +157,8 @@ class Bot:
         else:
             field, grid, distance = self.get_grid()
             self.get_positions(field, self.game.field_height, self.game.field_width)
+            if self.snippetpos == []:
+                self.game.issue_order(random.choice(legal))
+                return
             distance = self.bread_first_search(grid, distance)
-            for snipp in self.snippetpos:
-                print(snipp)
-                print(distance[snipp[0]][snipp[1]])
+            self.execute_next_move(distance)
