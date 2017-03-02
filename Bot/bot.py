@@ -104,6 +104,7 @@ class Bot:
         iterator = Iterator()
         mypos = self.mypos
         iterator.enqueue(mypos)
+        distance[mypos[0]][mypos[1]] = 0
 
         while not iterator.isEmpty():
             position = iterator.dequeue()
@@ -131,11 +132,8 @@ class Bot:
                             iterator.enqueue(new_pos)
 
 
-        print(distance)
+
         return distance
-
-
-
 
     def do_turn(self):
         """
