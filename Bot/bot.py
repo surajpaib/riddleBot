@@ -1,5 +1,6 @@
-import random
-
+"""
+Bot actions 
+"""
 UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 directions ={
     "[-1, 0]" : "up",
@@ -107,7 +108,7 @@ class Bot:
         iterator = Iterator()
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
-        grid[mypos[0]][mypos[1]] = 0
+        grid[mypos[0]][mypos[1]] = 2
 
         while not iterator.isEmpty():
             position = iterator.dequeue()
@@ -149,6 +150,7 @@ class Bot:
 
     def execute_next_move(self, distance, grid):
             closest_snippet, closest_distance = self.get_closest_snippet(distance)
+            print(closest_snippet)
             possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
             for move in UP, DOWN, LEFT, RIGHT:
@@ -177,6 +179,7 @@ class Bot:
         
         :return: Play a turn of the game
         """
+        self.snippetpos = []
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
         if len(legal) == 0:
