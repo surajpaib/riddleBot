@@ -107,7 +107,8 @@ class Bot:
         iterator = Iterator()
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
-        grid[mypos[0]][mypos[1]] = 0
+        grid[mypos[0]][mypos[1]] = 2
+
         while not iterator.isEmpty():
             position = iterator.dequeue()
 
@@ -138,32 +139,23 @@ class Bot:
         snippet_distances = []
         for snipp in self.snippetpos:
             snippet_distances.append(distance[snipp[0]][snipp[1]])
-        print(self.snippetpos)
-        print(snippet_distances)
+
         closest_distance = min(snippet_distances)
         for i, dist in enumerate(snippet_distances):
             if closest_distance == dist:
                 closest_snippet =  self.snippetpos[i]
                 break
-        print("Closest snippet")
-        print(closest_snippet, closest_distance)
         return closest_snippet, closest_distance
 
     def execute_next_move(self, distance, grid):
             closest_snippet, closest_distance = self.get_closest_snippet(distance)
 
             for move in UP, DOWN, LEFT, RIGHT:
-                print("Current position")
-                print(self.mypos)
-
                 new_position = self.add(self.mypos, move)
-                print("New position")
-                print(new_position)
-                print(distance)
+                field, grid, distance = self.get_grid()
                 distance[self.mypos[0]][self.mypos[1]] = -1
                 grid[self.mypos[0]][self.mypos[1]] = 0
                 distance = self.breadth_first_search(new_position, grid, distance)
-                print(distance)
                 (_, new_closest_distance) = self.get_closest_snippet(distance)
                 if new_closest_distance < closest_distance:
                     return move
