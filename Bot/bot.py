@@ -1,6 +1,8 @@
 """
 Bot actions 
 """
+import random
+
 UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 directions ={
     "[-1, 0]" : "up",
@@ -53,7 +55,7 @@ class Bot:
             for idy in range(field_width):
                 if field[idx][idy] == int(self.game.my_botid):
                     self.mypos = [idx, idy]
-                elif field[idx][idy] == 6:
+                elif (field[idx][idy] == 6) or (field[idx][idy] == 4):
                     self.snippetpos.append([idx, idy])
 
     @staticmethod
@@ -144,13 +146,12 @@ class Bot:
         closest_distance = min(snippet_distances)
         for i, dist in enumerate(snippet_distances):
             if closest_distance == dist:
-                closest_snippet =  self.snippetpos[i]
+                closest_snippet = self.snippetpos[i]
                 break
         return closest_snippet, closest_distance
 
     def execute_next_move(self, distance, grid):
             closest_snippet, closest_distance = self.get_closest_snippet(distance)
-            print(closest_snippet)
             possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
             for move in UP, DOWN, LEFT, RIGHT:
@@ -180,6 +181,7 @@ class Bot:
         :return: Play a turn of the game
         """
         self.snippetpos = []
+        self.mypos = None
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
         if len(legal) == 0:
@@ -187,6 +189,13 @@ class Bot:
         else:
             field, grid, distance = self.get_grid()
             self.get_positions(field, self.game.field_height, self.game.field_width)
+
+            # No snippet fallback
+            if self.snippetpos == []:
+                (_, choice) = random.choice(legal)
+                self.game.issue_order(choice)
+                return
+
             distance = self.breadth_first_search(self.mypos, grid, distance)
             choice = self.execute_next_move(distance, grid)
             if choice is not None:
