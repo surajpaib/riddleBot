@@ -107,7 +107,7 @@ class Bot:
         iterator = Iterator()
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
-        grid[mypos[0]][mypos[1]] = 2
+        grid[mypos[0]][mypos[1]] = 0
 
         while not iterator.isEmpty():
             position = iterator.dequeue()
@@ -149,12 +149,24 @@ class Bot:
 
     def execute_next_move(self, distance, grid):
             closest_snippet, closest_distance = self.get_closest_snippet(distance)
+            possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
             for move in UP, DOWN, LEFT, RIGHT:
+                # Check if the move is legal before running next move algorithm
+                legal = 0
+                for legal_move in possible_moves:
+                    if move == list(legal_move[0]):
+
+                        legal = 1
+                if legal != 1:
+                    continue
                 new_position = self.add(self.mypos, move)
+                # Get field, grid and distance from start
                 field, grid, distance = self.get_grid()
+                # Set new position as my current position
                 distance[self.mypos[0]][self.mypos[1]] = -1
                 grid[self.mypos[0]][self.mypos[1]] = 0
+                # Run BFS on the new position
                 distance = self.breadth_first_search(new_position, grid, distance)
                 (_, new_closest_distance) = self.get_closest_snippet(distance)
                 if new_closest_distance < closest_distance:
@@ -174,4 +186,7 @@ class Bot:
             self.get_positions(field, self.game.field_height, self.game.field_width)
             distance = self.breadth_first_search(self.mypos, grid, distance)
             choice = self.execute_next_move(distance, grid)
-            self.game.issue_order(directions[str(choice)])
+            if choice is not None:
+                self.game.issue_order(directions[str(choice)])
+            else:
+                self.game.issue_order_pass()
