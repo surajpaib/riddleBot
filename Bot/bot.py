@@ -225,8 +225,12 @@ class Bot:
                 self.game.issue_order(choice)
                 return
             distance = self.breadth_first_search(self.mypos, grid, distance)
+            
             if self.bugs != []:
-                self.evade_bugs(distance, grid)
+                choice = self.evade_bugs(distance, grid)
+                self.game.issue_order(directions[str(choice)])
+                return
+
             choice = self.execute_next_move(distance, grid)
             if choice is not None:
                 self.game.issue_order(directions[str(choice)])
