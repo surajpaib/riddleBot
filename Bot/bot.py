@@ -35,6 +35,8 @@ class Bot:
         self.game = None
         self.mypos = None
         self.snippetpos = []
+        self.bugs = []
+
 
     def setup(self, game):
         self.game = game
@@ -55,8 +57,10 @@ class Bot:
             for idy in range(field_width):
                 if field[idx][idy] == int(self.game.my_botid):
                     self.mypos = [idx, idy]
-                elif (field[idx][idy] == 6) or (field[idx][idy] == 4):
+                elif (field[idx][idy] == 6) or (field[idx][idy] == 5):
                     self.snippetpos.append([idx, idy])
+                elif field[idx][idy] == 4:
+                    self.bugs.append([idx, idy])
 
     @staticmethod
     def set_distances(field, field_height, field_width):
@@ -138,20 +142,20 @@ class Bot:
                             iterator.enqueue(new_pos)
         return distance
 
-    def get_closest_snippet(self, distance):
-        snippet_distances = []
-        for snipp in self.snippetpos:
-            snippet_distances.append(distance[snipp[0]][snipp[1]])
+    def get_closest_event(self, distance, event):
+        event_distances = []
+        for snipp in event:
+            event_distances.append(distance[snipp[0]][snipp[1]])
 
-        closest_distance = min(snippet_distances)
-        for i, dist in enumerate(snippet_distances):
+        closest_distance = min(event_distances)
+        for i, dist in enumerate(event_distances):
             if closest_distance == dist:
-                closest_snippet = self.snippetpos[i]
+                closest_event = event[i]
                 break
-        return closest_snippet, closest_distance
+        return closest_event, closest_distance
 
     def execute_next_move(self, distance, grid):
-            closest_snippet, closest_distance = self.get_closest_snippet(distance)
+            closest_snippet, closest_distance = self.get_closest_event(distance, self.snippetpos)
             possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
             for move in UP, DOWN, LEFT, RIGHT:
@@ -164,16 +168,40 @@ class Bot:
                 if legal != 1:
                     continue
                 new_position = self.add(self.mypos, move)
-                # Get field, grid and distance from start
+                # Get field, grid and distance f``rom start
                 field, grid, distance = self.get_grid()
                 # Set new position as my current position
                 distance[self.mypos[0]][self.mypos[1]] = -1
                 grid[self.mypos[0]][self.mypos[1]] = 0
                 # Run BFS on the new position
                 distance = self.breadth_first_search(new_position, grid, distance)
-                (_, new_closest_distance) = self.get_closest_snippet(distance)
+                (_, new_closest_distance) = self.get_closest_event(distance, self.snippetpos)
                 if new_closest_distance < closest_distance:
                     return move
+
+    def evade_bugs(self, distance, grid):
+        closest_bug, closest_distance = self.get_closest_event(distance, self.bugs)
+        possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
+
+        for move in UP, DOWN, LEFT, RIGHT:
+            # Check if the move is legal before running next move algorithm
+            legal = 0
+            for legal_move in possible_moves:
+                if move == list(legal_move[0]):
+                    legal = 1
+            if legal != 1:
+                continue
+            new_position = self.add(self.mypos, move)
+            # Get field, grid and distance f``rom start
+            field, grid, distance = self.get_grid()
+            # Set new position as my current position
+            distance[self.mypos[0]][self.mypos[1]] = -1
+            grid[self.mypos[0]][self.mypos[1]] = 0
+            # Run BFS on the new position
+            distance = self.breadth_first_search(new_position, grid, distance)
+            (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
+            if new_closest_distance > closest_distance:
+                return move
 
     def do_turn(self):
         """
@@ -181,6 +209,7 @@ class Bot:
         :return: Play a turn of the game
         """
         self.snippetpos = []
+        self.bugs = []
         self.mypos = None
         legal = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         #self.game.field.output()
@@ -195,8 +224,9 @@ class Bot:
                 (_, choice) = random.choice(legal)
                 self.game.issue_order(choice)
                 return
-
             distance = self.breadth_first_search(self.mypos, grid, distance)
+            if self.bugs != []:
+                self.evade_bugs(distance, grid)
             choice = self.execute_next_move(distance, grid)
             if choice is not None:
                 self.game.issue_order(directions[str(choice)])
