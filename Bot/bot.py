@@ -184,6 +184,8 @@ class Bot:
         possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
         for move in UP, DOWN, LEFT, RIGHT:
+            if closest_distance > 2:
+                return
             # Check if the move is legal before running next move algorithm
             legal = 0
             for legal_move in possible_moves:
