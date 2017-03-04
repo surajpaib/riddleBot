@@ -182,10 +182,11 @@ class Bot:
     def evade_bugs(self, distance, grid):
         closest_bug, closest_distance = self.get_closest_event(distance, self.bugs)
         possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
+        if closest_distance > 2:
+            return
 
         for move in UP, DOWN, LEFT, RIGHT:
-            if closest_distance > 2:
-                return
+
             # Check if the move is legal before running next move algorithm
             legal = 0
             for legal_move in possible_moves:
