@@ -110,7 +110,7 @@ class Bot:
         field = self.reshape(field, field_height, field_width)
         return field, grid, distance
 
-    def breadth_first_search(self,mypos, grid, distance):
+    def breadth_first_search(self, mypos, grid, distance):
         iterator = Iterator()
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
@@ -200,7 +200,7 @@ class Bot:
             # Run BFS on the new position
             distance = self.breadth_first_search(new_position, grid, distance)
             (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
-            if new_closest_distance > closest_distance:
+            if new_closest_distance >= closest_distance:
                 return move
 
     def do_turn(self):
@@ -224,12 +224,14 @@ class Bot:
                 (_, choice) = random.choice(legal)
                 self.game.issue_order(choice)
                 return
+
             distance = self.breadth_first_search(self.mypos, grid, distance)
-            
+
             if self.bugs != []:
                 choice = self.evade_bugs(distance, grid)
-                self.game.issue_order(directions[str(choice)])
-                return
+                if choice is not None:
+                    self.game.issue_order(directions[str(choice)])
+                    return
 
             choice = self.execute_next_move(distance, grid)
             if choice is not None:
