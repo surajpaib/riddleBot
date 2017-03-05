@@ -184,7 +184,7 @@ class Bot:
         closest_snippet, closest_distance_snippet = self.get_closest_event(distance, self.snippetpos)
         possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
-        if closest_distance[0] > 4:
+        if closest_distance > 4:
             return
 
         for move in UP, DOWN, LEFT, RIGHT:
@@ -205,7 +205,7 @@ class Bot:
             # Run BFS on the new position
             distance = self.breadth_first_search(new_position, grid, distance)
             (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
-            if (new_closest_distance[0] > closest_distance[0]) and (new_closest_distance[0] < closest_distance_snippet[0]):
+            if (new_closest_distance > closest_distance) and (new_closest_distance < closest_distance_snippet):
                 return move
 
         for move in UP, DOWN, LEFT, RIGHT:
@@ -214,8 +214,8 @@ class Bot:
             for legal_move in possible_moves:
                 if move == list(legal_move[0]):
                     legal = 1
-                if legal != 1:
-                    continue
+            if legal != 1:
+                continue
             new_position = self.add(self.mypos, move)
             # Get field, grid and distance f``rom start
             field, grid, distance = self.get_grid()
@@ -225,7 +225,7 @@ class Bot:
             # Run BFS on the new position
             distance = self.breadth_first_search(new_position, grid, distance)
             (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
-            if new_closest_distance[0] > closest_distance[0]:
+            if new_closest_distance > closest_distance:
                 return move
 
     def do_turn(self):
