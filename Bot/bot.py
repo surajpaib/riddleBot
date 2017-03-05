@@ -181,6 +181,7 @@ class Bot:
 
     def evade_bugs(self, distance, grid):
         closest_bug, closest_distance = self.get_closest_event(distance, self.bugs)
+        closest_snippet, closest_distance_snippet = self.get_closest_event(distance, self.snippetpos)
         possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
         if closest_distance > 3:
             return
@@ -203,8 +204,27 @@ class Bot:
             # Run BFS on the new position
             distance = self.breadth_first_search(new_position, grid, distance)
             (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
-            if new_closest_distance >= closest_distance:
+            if (new_closest_distance > closest_distance) and (new_closest_distance < closest_distance_snippet):
                 return move
+            for move in UP, DOWN, LEFT, RIGHT:
+                # Check if the move is legal before running next move algorithm
+                legal = 0
+                for legal_move in possible_moves:
+                    if move == list(legal_move[0]):
+                        legal = 1
+                if legal != 1:
+                    continue
+                new_position = self.add(self.mypos, move)
+                # Get field, grid and distance f``rom start
+                field, grid, distance = self.get_grid()
+                # Set new position as my current position
+                distance[self.mypos[0]][self.mypos[1]] = -1
+                grid[self.mypos[0]][self.mypos[1]] = 0
+                # Run BFS on the new position
+                distance = self.breadth_first_search(new_position, grid, distance)
+                (_, new_closest_distance) = self.get_closest_event(distance, self.bugs)
+                if new_closest_distance > closest_distance:
+                    return move
 
     def do_turn(self):
         """
