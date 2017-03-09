@@ -1,10 +1,10 @@
 """
-Bot actions 
+Bot actions
 """
 import random
 
 UP, DOWN, LEFT, RIGHT = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-directions ={
+directions = {
     "[-1, 0]" : "up",
     "[1, 0]" : "down",
     "[0, -1]" : "left",
@@ -29,7 +29,7 @@ class Iterator:
     def enqueue(self, item):
         """
         Add item to queue
-        :param item: item 
+        :param item: item
         :return: None
         """
         self.fields.insert(0, item)
@@ -56,7 +56,7 @@ class Bot:
     def setup(self, game):
         """
         Set game
-        :param game: 
+        :param game:
         :return: game
         """
         self.game = game
@@ -66,7 +66,7 @@ class Bot:
         """
         Reshape array
         :param list1: List to reshape
-        :param height: Height 
+        :param height: Height
         :param width: Width
         :return: Reshaped array
         """
@@ -100,10 +100,10 @@ class Bot:
     def set_distances(field, field_height, field_width):
         """
         preset distances
-        :param field: 
-        :param field_height: 
-        :param field_width: 
-        :return: 
+        :param field:
+        :param field_height:
+        :param field_width:
+        :return:
         """
         distance = field
         for idx in range(field_height):
@@ -116,8 +116,8 @@ class Bot:
     def add(array1, array2):
         """
         Function to add 2-D array elementwise
-        :param array1: 
-        :param array2: 
+        :param array1:
+        :param array2:
         :return: Resultant array
         """
         array_idx = array1[0] + array2[0]
@@ -129,8 +129,8 @@ class Bot:
     def set_grid(field, field_height, field_width, my_pos):
         """
         Grid object for BFS
-        :param field_height: 
-        :param field_width: 
+        :param field_height:
+        :param field_width:
         :return: Prepare Grid object for BFS 
         """
         grid = field
@@ -159,10 +159,10 @@ class Bot:
     def breadth_first_search(self, mypos, grid, distance):
         """
         BFS Algorithm
-        :param mypos: 
-        :param grid: 
-        :param distance: 
-        :return: 
+        :param mypos:
+        :param grid:
+        :param distance:
+        :return:
         """
         iterator = Iterator()
         iterator.enqueue(mypos)
@@ -173,7 +173,7 @@ class Bot:
             position = iterator.dequeue()
 
             for i in [-1, 0, 1]:
-                for j in [-1, 0 , 1]:
+                for j in [-1, 0, 1]:
                     if abs(i) == abs(j):
                         continue
                     new_pos = self.add(position, [i, j])
@@ -191,16 +191,17 @@ class Bot:
 
                     if (distance[int(new_pos[0])][int(new_pos[1])]) == -1:
                         if grid[new_pos[0]][new_pos[1]] != 0:
-                            distance[new_pos[0]][new_pos[1]] = distance[position[0]][position[1]] + 1
+                            distance[new_pos[0]][new_pos[1]] = \
+                                distance[position[0]][position[1]] + 1
                             iterator.enqueue(new_pos)
         return distance
 
     def get_closest_event(self, distance, event):
         """
         Nearest event algorithm
-        :param distance: 
-        :param event: 
-        :return: 
+        :param distance:
+        :param event:
+        :return:
         """
         event_distances = []
         for snipp in event:
