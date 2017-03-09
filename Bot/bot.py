@@ -13,23 +13,39 @@ directions ={
 
 
 class Iterator:
+    """
+    Fifo Queue
+    """
     def __init__(self):
         self.fields = []
 
     def isEmpty(self):
+        """
+        Check if empty
+        :return: Boolean
+        """
         return self.fields == []
 
     def enqueue(self, item):
+        """
+        Add item to queue
+        :param item: item 
+        :return: None
+        """
         self.fields.insert(0, item)
 
     def dequeue(self):
+        """
+        Remove from queue
+        :return: None
+        """
         return self.fields.pop()
-
-    def size(self):
-        return len(self.fields)
 
 
 class Bot:
+    """
+    Bot class
+    """
 
     def __init__(self):
         self.game = None
@@ -37,12 +53,23 @@ class Bot:
         self.snippetpos = []
         self.bugs = []
 
-
     def setup(self, game):
+        """
+        Set game
+        :param game: 
+        :return: game
+        """
         self.game = game
 
     @staticmethod
     def reshape(list1, height, width):
+        """
+        Reshape array
+        :param list1: List to reshape
+        :param height: Height 
+        :param width: Width
+        :return: Reshaped array
+        """
         array = []
         for h in range(height):
             array_inner = []
@@ -53,6 +80,13 @@ class Bot:
         return array
 
     def get_positions(self, field, field_height, field_width):
+        """
+        Get position of different elements from the field.
+        :param field: Field information
+        :param field_height: 
+        :param field_width: 
+        :return: Self positions, snippets and bugs
+        """
         for idx in range(field_height):
             for idy in range(field_width):
                 if field[idx][idy] == int(self.game.my_botid):
@@ -64,7 +98,13 @@ class Bot:
 
     @staticmethod
     def set_distances(field, field_height, field_width):
-
+        """
+        preset distances
+        :param field: 
+        :param field_height: 
+        :param field_width: 
+        :return: 
+        """
         distance = field
         for idx in range(field_height):
             for idy in range(field_width):
@@ -74,6 +114,12 @@ class Bot:
 
     @staticmethod
     def add(array1, array2):
+        """
+        Function to add 2-D array elementwise
+        :param array1: 
+        :param array2: 
+        :return: Resultant array
+        """
         array_idx = array1[0] + array2[0]
         array_idy = array1[1] + array2[1]
 
@@ -82,7 +128,7 @@ class Bot:
     @staticmethod
     def set_grid(field, field_height, field_width, my_pos):
         """
-    
+        Grid object for BFS
         :param field_height: 
         :param field_width: 
         :return: Prepare Grid object for BFS 
@@ -100,7 +146,7 @@ class Bot:
 
     def get_grid(self):
         """
-        
+        Perform operations in order        
         :return: Current playing field value sent from Engine
         """
         field = self.game.field.cell
@@ -111,6 +157,13 @@ class Bot:
         return field, grid, distance
 
     def breadth_first_search(self, mypos, grid, distance):
+        """
+        BFS Algorithm
+        :param mypos: 
+        :param grid: 
+        :param distance: 
+        :return: 
+        """
         iterator = Iterator()
         iterator.enqueue(mypos)
         distance[mypos[0]][mypos[1]] = 0
@@ -143,6 +196,12 @@ class Bot:
         return distance
 
     def get_closest_event(self, distance, event):
+        """
+        Nearest event algorithm
+        :param distance: 
+        :param event: 
+        :return: 
+        """
         event_distances = []
         for snipp in event:
             event_distances.append(distance[snipp[0]][snipp[1]])
@@ -155,31 +214,44 @@ class Bot:
         return closest_event, closest_distance
 
     def execute_next_move(self, distance, grid):
-            closest_snippet, closest_distance = self.get_closest_event(distance, self.snippetpos)
-            possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
+        """
+        Plan next move
+        :param distance: 
+        :param grid: 
+        :return: 
+        """
+        closest_snippet, closest_distance = self.get_closest_event(distance, self.snippetpos)
+        possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
 
-            for move in UP, DOWN, LEFT, RIGHT:
-                # Check if the move is legal before running next move algorithm
-                legal = 0
-                for legal_move in possible_moves:
-                    if move == list(legal_move[0]):
+        for move in UP, DOWN, LEFT, RIGHT:
+            # Check if the move is legal before running next move algorithm
+            legal = 0
+            for legal_move in possible_moves:
+                if move == list(legal_move[0]):
 
-                        legal = 1
-                if legal != 1:
-                    continue
-                new_position = self.add(self.mypos, move)
-                # Get field, grid and distance f``rom start
-                field, grid, distance = self.get_grid()
-                # Set new position as my current position
-                distance[self.mypos[0]][self.mypos[1]] = -1
-                grid[self.mypos[0]][self.mypos[1]] = 0
-                # Run BFS on the new position
-                distance = self.breadth_first_search(new_position, grid, distance)
-                (_, new_closest_distance) = self.get_closest_event(distance, self.snippetpos)
-                if new_closest_distance < closest_distance:
-                    return move
+                    legal = 1
+            if legal != 1:
+                continue
+            new_position = self.add(self.mypos, move)
+            # Get field, grid and distance f``rom start
+            field, grid, distance = self.get_grid()
+            # Set new position as my current position
+            distance[self.mypos[0]][self.mypos[1]] = -1
+            grid[self.mypos[0]][self.mypos[1]] = 0
+            # Run BFS on the new position
+            distance = self.breadth_first_search(new_position, grid, distance)
+            (_, new_closest_distance) = self.get_closest_event(distance, self.snippetpos)
+            if new_closest_distance < closest_distance:
+                return move
 
     def evade_bugs(self, distance, grid):
+        """
+        Evade bugs actively ( Highest priority )
+        :param self: 
+        :param distance: 
+        :param grid: 
+        :return: 
+        """
         closest_bug, closest_distance = self.get_closest_event(distance, self.bugs)
         closest_snippet, closest_distance_snippet = self.get_closest_event(distance, self.snippetpos)
         possible_moves = self.game.field.legal_moves(self.game.my_botid, self.game.players)
@@ -230,7 +302,7 @@ class Bot:
 
     def do_turn(self):
         """
-        
+        Function that returns final move
         :return: Play a turn of the game
         """
         self.snippetpos = []
